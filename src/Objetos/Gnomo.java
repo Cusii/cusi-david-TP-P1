@@ -7,28 +7,48 @@ import entorno.Entorno;
 public class Gnomo {
     private int x;
     private int y;
-    private int altura;
-    private int base;
+    private int ancho;
+    private int alto;
     private int velocidad;
+    private boolean moverDerecha;
+    private boolean moverAbajo;
 
-    public Gnomo(int x, int y, int altura, int base, int velocidad) {
+    public Gnomo(int x, int y, int ancho, int alto, int velocidad, Boolean moverDerecha) {
         this.x = x;
         this.y = y;
-        this.altura = altura;
-        this.base = base;
+        this.ancho = ancho;
+        this.alto = alto;
         this.velocidad = velocidad;
+        this.moverDerecha = moverDerecha;
+        this.moverAbajo = false; // Empieza sin moverse hacia abajo
+    }
+
+    public void cambiarDireccion() {
+        this.moverDerecha = !this.moverDerecha;
+    }
+
+    public void iniciarMovimientoAbajo() {
+        this.moverAbajo = true;
+    }
+
+    public void detenerMovimientoAbajo() {
+        this.moverAbajo = false;
     }
 
     public void moverIzquierda() {
-        this.x = this.x - velocidad;
+        this.x -= velocidad;
     }
 
     public void moverDerecha() {
-        this.x = this.x + velocidad;
+        this.x += velocidad;
+    }
+
+    public void moverAbajo() {
+        this.y += velocidad;
     }
 
     public void dibujar(Entorno entorno) {
-        entorno.dibujarTriangulo(this.x, this.y, this.altura, this.base, 90, Color.RED);
+        entorno.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, Color.RED);
     }
 
     public int getX() {
@@ -39,16 +59,24 @@ public class Gnomo {
         return y;
     }
 
-    public int getAltura() {
-        return altura;
+    public int getAncho() {
+        return ancho;
     }
 
-    public int getBase() {
-        return base;
+    public int getAlto() {
+        return alto;
     }
 
     public int getVelocidad() {
         return velocidad;
+    }
+
+    public boolean getMovimiento() {
+        return moverDerecha;
+    }
+
+    public boolean estaMoviendoseAbajo() {
+        return moverAbajo;
     }
 
 }
