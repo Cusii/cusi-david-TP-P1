@@ -1,9 +1,8 @@
 package Objetos;
 
-import java.awt.Color;
 import java.awt.Image;
-
 import entorno.Entorno;
+import entorno.Herramientas;
 
 public class Isla {
 
@@ -20,6 +19,8 @@ public class Isla {
         this.ancho = ancho;
         this.alto = alto;
         this.velocidad = velocidad;
+
+        this.imagen = Herramientas.cargarImagen(rutaImagen);
     }
 
     public void moverIzquierda() {
@@ -31,7 +32,11 @@ public class Isla {
     }
 
     public void dibujar(Entorno entorno) {
-        entorno.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, Color.YELLOW);
+        if (imagen != null) {
+            entorno.dibujarImagen(imagen, this.x, this.y, 0, 1.0);
+        } else {
+            entorno.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, java.awt.Color.YELLOW);
+        }
     }
 
     public int getX() {
@@ -53,5 +58,4 @@ public class Isla {
     public int getVelocidad() {
         return velocidad;
     }
-
 }

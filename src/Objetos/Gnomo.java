@@ -3,6 +3,7 @@ package Objetos;
 import java.awt.Image;
 import java.util.Random;
 import entorno.Entorno;
+import entorno.Herramientas;
 
 public class Gnomo {
     private int x, y, ancho, alto, velocidad;
@@ -11,7 +12,7 @@ public class Gnomo {
     private Image imagen;
     private Random random;
 
-    public Gnomo(int x, int y, int ancho, int alto, int velocidad, boolean moviendoseDerecha) {
+    public Gnomo(int x, int y, int ancho, int alto, int velocidad, boolean moviendoseDerecha, String rutaImagen) {
         this.x = x;
         this.y = y;
         this.ancho = ancho;
@@ -20,6 +21,8 @@ public class Gnomo {
         this.moviendoseDerecha = moviendoseDerecha;
         this.aterrizado = false;
         this.random = new Random();
+        this.imagen = Herramientas.cargarImagen(rutaImagen);
+
     }
 
     public void moverGnomo() {
@@ -101,5 +104,13 @@ public class Gnomo {
 
     public int getAlto() {
         return alto;
+    }
+
+    public boolean getMoverDerecha(){
+        return moviendoseDerecha;
+    }
+
+    public void setImagen(String link) {
+        this.imagen = Herramientas.cargarImagen(link);
     }
 }

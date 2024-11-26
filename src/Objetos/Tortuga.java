@@ -1,15 +1,18 @@
 package Objetos;
 
 import java.awt.Color;
+import java.awt.Image;
 
 import entorno.Entorno;
+import entorno.Herramientas;
 
 public class Tortuga {
     private int x, y, ancho, alto, velocidad;
     private boolean moviendoseDerecha;
     private boolean moverAbajo;
+    private Image imagen;
 
-    public Tortuga(int x, int y, int ancho, int alto, int velocidad, Boolean moviendoseDerecha) {
+    public Tortuga(int x, int y, int ancho, int alto, int velocidad, Boolean moviendoseDerecha, String rutaImagen) {
         this.x = x;
         this.y = y;
         this.ancho = ancho;
@@ -17,6 +20,7 @@ public class Tortuga {
         this.velocidad = velocidad;
         this.moviendoseDerecha = moviendoseDerecha;
         this.moverAbajo = true;
+        this.imagen = Herramientas.cargarImagen(rutaImagen);
 
     }
 
@@ -40,7 +44,13 @@ public class Tortuga {
     }
 
     public void dibujar(Entorno entorno) {
-        entorno.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, Color.GREEN);
+        if (imagen != null) {
+            entorno.dibujarImagen(imagen, this.x, this.y, 0, 1.0);
+
+        } else {
+            entorno.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, Color.GREEN);
+
+        }
     }
 
     public boolean colisionaConIsla(Isla isla) {
@@ -96,6 +106,15 @@ public class Tortuga {
 
     public boolean getMoverAbajo() {
         return moverAbajo;
+    }
+
+    public boolean getMoverDerecha(){
+        return moviendoseDerecha;
+    }
+
+    public void setImagen(String link) {
+        this.imagen = Herramientas.cargarImagen(link);
+
     }
 
 }

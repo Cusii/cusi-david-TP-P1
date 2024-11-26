@@ -1,14 +1,19 @@
 package Objetos;
 
 import java.awt.Color;
+import java.awt.Image;
+
 import entorno.Entorno;
+import entorno.Herramientas;
 
 public class Pep {
     private int x, y, ancho, alto, velocidad;
     private int velocidadVertical;
     private boolean saltando;
+    private boolean mirandoDerecha;
+    private Image imagen;
 
-    public Pep(int x, int y, int ancho, int alto, int velocidad) {
+    public Pep(int x, int y, int ancho, int alto, int velocidad, boolean mirandoDerecha, String rutaImagen) {
         this.x = x;
         this.y = y;
         this.ancho = ancho;
@@ -16,6 +21,9 @@ public class Pep {
         this.velocidad = velocidad;
         this.velocidadVertical = 0;
         this.saltando = false;
+        this.mirandoDerecha = mirandoDerecha;
+        this.imagen = Herramientas.cargarImagen(rutaImagen);
+
     }
 
     public void iniciarSalto() {
@@ -30,7 +38,7 @@ public class Pep {
 
         for (Isla isla : islas) {
             if (isla != null && colisionaConIsla(isla)) {
-                System.out.println(sobreUnaIsla);
+                // System.out.println(sobreUnaIsla);
 
                 sobreUnaIsla = true;
                 // Detener la caída y ajustar posición encima de la isla
@@ -55,14 +63,20 @@ public class Pep {
 
     public void moverIzquierda() {
         x -= velocidad;
+        mirandoDerecha = false;
     }
 
     public void moverDerecha() {
+        mirandoDerecha = true;
         x += velocidad;
     }
 
     public void dibujar(Entorno entorno) {
-        entorno.dibujarRectangulo(x, y, ancho, alto, 0, Color.WHITE);
+        if (imagen != null) {
+            entorno.dibujarImagen(imagen, this.x, this.y, 0, 1.0);
+        } else {
+            entorno.dibujarRectangulo(x, y, ancho, alto, 0, Color.WHITE);
+        }
     }
 
     public boolean colisionaConIsla(Isla isla) {
@@ -112,5 +126,13 @@ public class Pep {
 
     public int getAlto() {
         return alto;
+    }
+
+    public boolean getMoverDerecha(){
+        return mirandoDerecha;
+    }
+
+    public void setImagen(String link) {
+        this.imagen = Herramientas.cargarImagen(link);
     }
 }

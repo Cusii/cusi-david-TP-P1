@@ -13,13 +13,16 @@ public class BolaDeFuego {
     private Image imagen;
     private boolean ladoDerecho;
 
-    public BolaDeFuego(int x, int y, int ancho, int alto, int velocidad, boolean ladoDerecho) {
+
+    public BolaDeFuego(int x, int y, int ancho, int alto, int velocidad, boolean ladoDerecho, String rutaImagen ) {
         this.x = x;
         this.y = y;
         this.ancho = ancho;
         this.alto = alto;
         this.velocidad = velocidad;
         this.ladoDerecho = ladoDerecho;
+        this.imagen = Herramientas.cargarImagen(rutaImagen);
+
     }
 
     public void moverBolaDeFuego() {

@@ -30,7 +30,6 @@ public class Juego extends InterfaceJuego {
 	int anchoPantalla = 1000;
 	Boolean juegoRunning = true;
 	Boolean logs = true;
-	Boolean pepeMirandoDerecha = true;
 
 	int gnomosSalvados = 0;
 	int gnomosPerdidos = 0;
@@ -45,6 +44,7 @@ public class Juego extends InterfaceJuego {
 		this.tortugas = new Tortuga[6];
 		// this.bolaDeFuego = new BolaDeFuego[6];
 		this.bolasDeFuego = new ArrayList<>();
+		// this.imagenIsla = Herramientas.cargarImagen("img/isla.png");
 
 		int islaNum = 0;
 		int gnomoNum = 0;
@@ -59,7 +59,7 @@ public class Juego extends InterfaceJuego {
 			for (int i = 0; i < fila; i++) {
 				int x = inicioX + (i * espacioEntreIslas);
 				int y = fila * yInicial;
-				this.islas[islaNum] = new Isla(x, y, 100, 30, 2, "isla.png");
+				this.islas[islaNum] = new Isla(x, y, 100, 30, 2, "img/isla.png");
 				islaNum++;
 			}
 		}
@@ -74,8 +74,8 @@ public class Juego extends InterfaceJuego {
 
 		}
 
-		this.casa = new Casa((anchoPantalla / 2), 60, 60, 60);
-		this.pep = new Pep(75, 400, 30, 50, 2);
+		this.casa = new Casa((anchoPantalla / 2), 60, 60, 60, "img/casa.png");
+		this.pep = new Pep(75, 400, 30, 50, 2, true, "img/pepDerecha.png");
 
 		// Inicia el juego!
 		this.entorno.iniciar();
@@ -108,6 +108,11 @@ public class Juego extends InterfaceJuego {
 				if (isla != null && gnomo.colisionaConIsla(isla)) {
 					sobreUnaIsla = true;
 					gnomo.cambiarDireccionAleatoria();
+					if (!gnomo.getMoverDerecha()) {
+						gnomo.setImagen("img/gnomoDerecha.png");
+					} else {
+						gnomo.setImagen("img/gnomoIzquierda.png");
+					}
 					break;
 				}
 			}
@@ -128,7 +133,7 @@ public class Juego extends InterfaceJuego {
 				gnomosPerdidos++;
 				gnomos[i] = crearNuevoGnomo();
 			}
-			if(gnomo.colisionaConPep(pep)){
+			if (gnomo.colisionaConPep(pep)) {
 				gnomosSalvados++;
 				gnomos[i] = crearNuevoGnomo();
 			}
@@ -154,11 +159,18 @@ public class Juego extends InterfaceJuego {
 			}
 			if (!sobreUnaIsla && !tortuga.getMoverAbajo()) {
 				tortuga.cambiarDireccion();
+				if (tortuga.getMoverDerecha()) {
+					tortuga.setImagen("img/tortugaIzquierda.png");
+				} else {
+					tortuga.setImagen("img/tortugaDerecha.png");
+
+				}
 				tortuga.mover();
 			}
 			for (int j = 0; j < bolasDeFuego.size(); j++) {
 				if (tortuga.colisionaConBolaDeFuego(bolasDeFuego.get(j))) {
 					bolasDeFuego.remove(j);
+					tortugasDerrotadas++;
 					tortugas[i] = crearNuevaTortuga();
 				}
 
@@ -169,7 +181,13 @@ public class Juego extends InterfaceJuego {
 		// PEP
 		moverPep();
 		if (entorno.sePresiono('c')) {
-			bolasDeFuego.add(new BolaDeFuego(pep.getX(), pep.getY(), 30, 30, 3, pepeMirandoDerecha));
+			String bolaDeFuego;
+			if (pep.getMoverDerecha()) {
+				bolaDeFuego = "img/bolaDeFuegoDer.png";
+			} else {
+				bolaDeFuego = "img/bolaDeFuegoIzq.png";
+			}
+			bolasDeFuego.add(new BolaDeFuego(pep.getX(), pep.getY(), 30, 30, 3, pep.getMoverDerecha(), bolaDeFuego));
 		}
 		for (Tortuga tortuga : tortugas) {
 			if (pep.colisionaConTortuga(tortuga)) {
@@ -194,29 +212,44 @@ public class Juego extends InterfaceJuego {
 		// TEXTOS
 		entorno.escribirTexto("Gnomos perdidos: " + gnomosPerdidos, 100, 100);
 		entorno.escribirTexto("Gnomos Salvados: " + gnomosSalvados, 100, 150);
+		entorno.escribirTexto("Tortugas Eliminadas: " + tortugasDerrotadas, 100, 200);
 	}
 
 	private Gnomo crearNuevoGnomo() {
-		return new Gnomo((anchoPantalla / 2), 60, 30, 50, 1, random.nextBoolean());
+		boolean moverDerecha = random.nextBoolean();
+		String rutaImagen;
+		if (!moverDerecha) {
+			rutaImagen = "img/gnomoDerecha.png";
+		} else {
+			rutaImagen = "img/gnomoIzquierda.png";
+		}
+		return new Gnomo((anchoPantalla / 2), 60, 30, 50, 1, moverDerecha, rutaImagen);
 	}
 
 	private Tortuga crearNuevaTortuga() {
 		int numRandom;
+		boolean moverDerecha = random.nextBoolean();
+		String rutaImagen;
 		do {
 			numRandom = random.nextInt(anchoPantalla);
 		} while (!((numRandom > 100 && numRandom <= 400) || (numRandom >= 600 && numRandom < 950)));
-		return new Tortuga(numRandom, 60, 50, 50, 1, random.nextBoolean());
+		if (!moverDerecha) {
+			rutaImagen = "img/tortugaDerecha.png";
+		} else {
+			rutaImagen = "img/tortugaIzquierda.png";
+		}
+		return new Tortuga(numRandom, 60, 50, 50, 1, moverDerecha, rutaImagen);
 	}
 
 	private void moverPep() {
 		pep.actualizarSalto(islas);
 
 		if (entorno.estaPresionada(entorno.TECLA_IZQUIERDA) && pep.getX() > pep.getAncho()) {
-			pepeMirandoDerecha = false;
+			pep.setImagen("img/pepIzquierda.png");
 			pep.moverIzquierda();
 		}
 		if (entorno.estaPresionada(entorno.TECLA_DERECHA) && pep.getX() < entorno.ancho() - pep.getAncho()) {
-			pepeMirandoDerecha = true;
+			pep.setImagen("img/pepDerecha.png");
 			pep.moverDerecha();
 		}
 		if (entorno.sePresiono(entorno.TECLA_ARRIBA)) {
