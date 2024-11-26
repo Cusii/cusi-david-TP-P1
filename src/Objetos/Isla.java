@@ -1,6 +1,8 @@
 package Objetos;
 
 import java.awt.Color;
+import java.awt.Image;
+
 import entorno.Entorno;
 
 public class Isla {
@@ -10,8 +12,9 @@ public class Isla {
     private int ancho;
     private int alto;
     private int velocidad;
+    private Image imagen;
 
-    public Isla(int x, int y, int ancho, int alto, int velocidad) {
+    public Isla(int x, int y, int ancho, int alto, int velocidad, String rutaImagen) {
         this.x = x;
         this.y = y;
         this.ancho = ancho;

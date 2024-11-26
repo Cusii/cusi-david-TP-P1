@@ -1,82 +1,105 @@
 package Objetos;
 
-import java.awt.Color;
-
+import java.awt.Image;
+import java.util.Random;
 import entorno.Entorno;
 
 public class Gnomo {
-    private int x;
-    private int y;
-    private int ancho;
-    private int alto;
-    private int velocidad;
-    private boolean moverDerecha;
-    private boolean moverAbajo;
+    private int x, y, ancho, alto, velocidad;
+    private boolean moviendoseDerecha;
+    private boolean aterrizado;
+    private Image imagen;
+    private Random random;
 
-    public Gnomo(int x, int y, int ancho, int alto, int velocidad, Boolean moverDerecha) {
+    public Gnomo(int x, int y, int ancho, int alto, int velocidad, boolean moviendoseDerecha) {
         this.x = x;
         this.y = y;
         this.ancho = ancho;
         this.alto = alto;
         this.velocidad = velocidad;
-        this.moverDerecha = moverDerecha;
-        this.moverAbajo = false; // Empieza sin moverse hacia abajo
+        this.moviendoseDerecha = moviendoseDerecha;
+        this.aterrizado = false;
+        this.random = new Random();
     }
 
-    public void cambiarDireccion() {
-        this.moverDerecha = !this.moverDerecha;
+    public void moverGnomo() {
+        if (moviendoseDerecha) {
+            x += velocidad;
+        } else {
+            x -= velocidad;
+        }
     }
 
-    public void iniciarMovimientoAbajo() {
-        this.moverAbajo = true;
-    }
-
-    public void detenerMovimientoAbajo() {
-        this.moverAbajo = false;
-    }
-
-    public void moverIzquierda() {
-        this.x -= velocidad;
-    }
-
-    public void moverDerecha() {
-        this.x += velocidad;
-    }
-
-    public void moverAbajo() {
+    public void moverGnomoAbajo() {
         this.y += velocidad;
+        this.aterrizado = false;
+    }
+
+    public void cambiarDireccionAleatoria() {
+        if (!aterrizado) {
+            this.moviendoseDerecha = random.nextBoolean();
+            this.aterrizado = true;
+        }
     }
 
     public void dibujar(Entorno entorno) {
-        entorno.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, Color.RED);
+        if (imagen != null) {
+            entorno.dibujarImagen(imagen, this.x, this.y, 0, 1.0);
+        } else {
+            entorno.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, java.awt.Color.RED);
+        }
     }
 
-    public int getX() {
-        return x;
+    public boolean colisionaConIsla(Isla isla) {
+        int limiteIzquierdoGnomo = this.x - this.ancho / 2;
+        int limiteDerechoGnomo = this.x + this.ancho / 2;
+        int limiteSuperiorGnomo = this.y - this.alto / 2;
+        int limiteInferiorGnomo = this.y + this.alto / 2;
+
+        int limiteIzquierdoIsla = isla.getX() - isla.getAncho() / 2;
+        int limiteDerechoIsla = isla.getX() + isla.getAncho() / 2;
+        int limiteSuperiorIsla = isla.getY() - isla.getAlto() / 2;
+        int limiteInferiorIsla = isla.getY() + isla.getAlto() / 2;
+
+        return (limiteDerechoGnomo > limiteIzquierdoIsla && limiteIzquierdoGnomo < limiteDerechoIsla)
+                && (limiteInferiorGnomo > limiteSuperiorIsla && limiteSuperiorGnomo < limiteInferiorIsla);
+    }
+
+    public boolean colisionaConTortuga(Tortuga tortuga) {
+        int limiteIzquierdoGnomo = this.x - this.ancho / 2;
+        int limiteDerechoGnomo = this.x + this.ancho / 2;
+        int limiteSuperiorGnomo = this.y - this.alto / 2;
+        int limiteInferiorGnomo = this.y + this.alto / 2;
+
+        int limiteIzquierdoTortuga = tortuga.getX() - tortuga.getAncho() / 2;
+        int limiteDerechoTortuga = tortuga.getX() + tortuga.getAncho() / 2;
+        int limiteSuperiorTortuga = tortuga.getY() - tortuga.getAlto() / 2;
+        int limiteInferiorTortuga = tortuga.getY() + tortuga.getAlto() / 2;
+
+        return (limiteDerechoGnomo > limiteIzquierdoTortuga && limiteIzquierdoGnomo < limiteDerechoTortuga)
+                && (limiteInferiorGnomo > limiteSuperiorTortuga && limiteSuperiorGnomo < limiteInferiorTortuga);
+    }
+
+    public boolean colisionaConPep(Pep pep) {
+        int limiteIzquierdoGnomo = this.x - this.ancho / 2;
+        int limiteDerechoGnomo = this.x + this.ancho / 2;
+        int limiteSuperiorGnomo = this.y - this.alto / 2;
+        int limiteInferiorGnomo = this.y + this.alto / 2;
+
+        int limiteIzquierdoPep = pep.getX() - pep.getAncho() / 2;
+        int limiteDerechoPep = pep.getX() + pep.getAncho() / 2;
+        int limiteSuperiorPep = pep.getY() - pep.getAlto() / 2;
+        int limiteInferiorPep = pep.getY() + pep.getAlto() / 2;
+
+        return (limiteDerechoGnomo > limiteIzquierdoPep && limiteIzquierdoGnomo < limiteDerechoPep)
+                && (limiteInferiorGnomo > limiteSuperiorPep && limiteSuperiorGnomo < limiteInferiorPep);
     }
 
     public int getY() {
         return y;
     }
 
-    public int getAncho() {
-        return ancho;
-    }
-
     public int getAlto() {
         return alto;
     }
-
-    public int getVelocidad() {
-        return velocidad;
-    }
-
-    public boolean getMovimiento() {
-        return moverDerecha;
-    }
-
-    public boolean estaMoviendoseAbajo() {
-        return moverAbajo;
-    }
-
 }

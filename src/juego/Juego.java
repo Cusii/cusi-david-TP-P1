@@ -1,10 +1,11 @@
 package juego;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import entorno.Entorno;
 import entorno.InterfaceJuego;
-
+import Objetos.BolaDeFuego;
 import Objetos.Casa;
 import Objetos.Gnomo;
 import Objetos.Isla;
@@ -14,26 +15,40 @@ import Objetos.Tortuga;
 public class Juego extends InterfaceJuego {
 	// El objeto Entorno que controla el tiempo y otros
 	private Entorno entorno;
+
 	// Variables y métodos propios de cada grupo
 	private Isla[] islas;
 	private Casa casa;
 	private Pep pep;
 	private Gnomo[] gnomos;
+	private Tortuga[] tortugas;
+	// private BolaDeFuego[] bolaDeFuego;
+	private ArrayList<BolaDeFuego> bolasDeFuego;
+
 	Random random = new Random();
 	int islaActual = 1;
 	int anchoPantalla = 1000;
 	Boolean juegoRunning = true;
 	Boolean logs = true;
+	Boolean pepeMirandoDerecha = true;
+
+	int gnomosSalvados = 0;
+	int gnomosPerdidos = 0;
+	int tortugasDerrotadas = 0;
 
 	Juego() {
 		// Inicializa el objeto entorno
 		this.entorno = new Entorno(this, "Al Rescate de los Gnomos", anchoPantalla, 600);
 
 		this.islas = new Isla[16];
-		this.gnomos = new Gnomo[2];
+		this.gnomos = new Gnomo[4];
+		this.tortugas = new Tortuga[6];
+		// this.bolaDeFuego = new BolaDeFuego[6];
+		this.bolasDeFuego = new ArrayList<>();
 
 		int islaNum = 0;
 		int gnomoNum = 0;
+		int tortugaNum = 0;
 		int yInicial = 100;
 
 		// Generar filas para las islas
@@ -44,17 +59,23 @@ public class Juego extends InterfaceJuego {
 			for (int i = 0; i < fila; i++) {
 				int x = inicioX + (i * espacioEntreIslas);
 				int y = fila * yInicial;
-				this.islas[islaNum] = new Isla(x, y, 100, 30, 2);
+				this.islas[islaNum] = new Isla(x, y, 100, 30, 2, "isla.png");
 				islaNum++;
 			}
 		}
-		for (int i = 1; i <= 2; i++) {
-			this.gnomos[gnomoNum] = new Gnomo((anchoPantalla / 2), 60, 30, 50, 1, random.nextBoolean());
+		for (int i = 1; i <= gnomos.length; i++) {
+			this.gnomos[gnomoNum] = crearNuevoGnomo();
 			gnomoNum++;
 		}
 
-		this.casa = new Casa((anchoPantalla / 2), 60, 50, 50);
-		this.pep = new Pep(75, 460, 30, 50, 2);
+		for (int i = 0; i < tortugas.length; i++) {
+			this.tortugas[tortugaNum] = crearNuevaTortuga();
+			tortugaNum++;
+
+		}
+
+		this.casa = new Casa((anchoPantalla / 2), 60, 60, 60);
+		this.pep = new Pep(75, 400, 30, 50, 2);
 
 		// Inicia el juego!
 		this.entorno.iniciar();
@@ -71,139 +92,135 @@ public class Juego extends InterfaceJuego {
 		// CASA
 		casa.dibujar(entorno);
 
-		// GNOMOS
-
-		// Mover el gnomo automáticamente
-		for (int i = 0; i < this.gnomos.length; i++) {
-			Gnomo gnomo = gnomos[i];
-			// Isla isla = this.islas[1];
-			Isla isla = nextIsla(islaActual);
-			// System.out.println(islaActual);
-
-			if (isla != null) {
-				if (gnomo.estaMoviendoseAbajo()) {
-					gnomo.moverAbajo();
-					if (gnomo.getY() > this.islas[islaActual].getY() - 40) {
-						gnomo.detenerMovimientoAbajo();
-						islaActual++;
-					}
-				} else {
-					if (gnomo.getMovimiento()) {
-						gnomo.moverDerecha();
-						// Cambiar dirección si el gnomo alcanza el borde derecho
-						if (gnomo.getX() > (isla.getX() + 185)) {
-							gnomo.cambiarDireccion();
-							gnomo.iniciarMovimientoAbajo();
-						}
-					} else {
-						gnomo.moverIzquierda();
-						// Cambiar dirección si el gnomo alcanza el borde izquierdo
-						if (gnomo.getX() < (isla.getX() + 15)) {
-							gnomo.cambiarDireccion();
-							gnomo.iniciarMovimientoAbajo();
-						}
-					}
-				}
-			}
-			gnomo.dibujar(entorno);
-
-		}
 		// ISLAS
-		for (int i = 0; i < this.islas.length; i++) {
-			Isla isla = this.islas[i];
+		for (Isla isla : islas) {
 			if (isla != null) {
 				isla.dibujar(this.entorno);
 			}
 		}
 
-		// PEP
-		if (juegoRunning) {
-			// Isla isla = this.islas[10];
-			// System.out.println("pep: " + pep.getX());
-			// System.out.println("pep: " + pep.getAncho());
-			// System.out.println("isla: " + (isla.getX() + isla.getAncho()));
-			// System.out.println("isla test : " + pep.getY());
-			// System.out.println("isla test : " + (isla.getY() - isla.getAlto()));
-			//
-			// if ((pep.getX() >= isla.getX() - (pep.getX() + pep.getAncho()) && pep.getX()
-			// <= 170)
-			// && pep.getY() <= isla.getY() - isla.getAlto()) {
-			// controlIslasPep(10);
-			// } else if ((pep.getX() >= isla.getX() - (pep.getX() + pep.getAncho()) &&
-			// pep.getX() <= 170)
-			// && pep.getY() <= isla.getY() - isla.getAlto()) {
-			// controlIslasPep(11);
-			// }
+		// GNOMOS
+		for (int i = 0; i < gnomos.length; i++) {
+			Gnomo gnomo = gnomos[i];
+			boolean sobreUnaIsla = false;
 
-			for (int isl = 1; isl < this.islas.length; isl++) {
-				Isla isla = this.islas[isl];
-				if (isla != null) {
-
-				if ((pep.getX() >= isla.getX() - (pep.getX() + pep.getAncho()) && pep.getX() <= 170)
-						&& pep.getY() <= isla.getY() - isla.getAlto()) {
-					controlIslasPep(isl);
-				} else if ((pep.getX() >= isla.getX() - (pep.getX() + pep.getAncho()) && pep.getX() <= 170)
-						&& pep.getY() <= isla.getY() - isla.getAlto()) {
-					controlIslasPep(isl);
+			for (Isla isla : islas) {
+				if (isla != null && gnomo.colisionaConIsla(isla)) {
+					sobreUnaIsla = true;
+					gnomo.cambiarDireccionAleatoria();
+					break;
 				}
+			}
+			for (Tortuga tortuga : tortugas) {
+				if (tortuga != null && gnomo.colisionaConTortuga(tortuga)) {
+					gnomosPerdidos++;
+					gnomos[i] = crearNuevoGnomo();
+					break;
+				}
+			}
+			if (!sobreUnaIsla) {
+				gnomo.moverGnomoAbajo();
+			} else {
+				gnomo.moverGnomo();
+			}
+
+			if (gnomo.getY() - gnomo.getAlto() > entorno.alto()) {
+				gnomosPerdidos++;
+				gnomos[i] = crearNuevoGnomo();
+			}
+			if(gnomo.colisionaConPep(pep)){
+				gnomosSalvados++;
+				gnomos[i] = crearNuevoGnomo();
+			}
+
+			gnomo.dibujar(entorno);
+		}
+
+		// TOTTUGAS
+		for (int i = 0; i < tortugas.length; i++) {
+			Tortuga tortuga = tortugas[i];
+			boolean sobreUnaIsla = false;
+
+			for (Isla isla : islas) {
+				if (isla != null && tortuga.colisionaConIsla(isla)) {
+					sobreUnaIsla = true;
+					break;
+				}
+			}
+			if (!sobreUnaIsla) {
+				tortuga.apareceTortuga();
+			} else {
+				tortuga.mover();
+			}
+			if (!sobreUnaIsla && !tortuga.getMoverAbajo()) {
+				tortuga.cambiarDireccion();
+				tortuga.mover();
+			}
+			for (int j = 0; j < bolasDeFuego.size(); j++) {
+				if (tortuga.colisionaConBolaDeFuego(bolasDeFuego.get(j))) {
+					bolasDeFuego.remove(j);
+					tortugas[i] = crearNuevaTortuga();
 				}
 
 			}
-
-		} else if (logs) {
-			System.out.println("Fin del juego: pepe cayo del mundo");
-			logs = false;
+			tortuga.dibujar(entorno);
 		}
-		entorno.escribirTexto(".test.", 400, 500);
-		entorno.escribirTexto("_480", 100, 480);
 
+		// PEP
+		moverPep();
+		if (entorno.sePresiono('c')) {
+			bolasDeFuego.add(new BolaDeFuego(pep.getX(), pep.getY(), 30, 30, 3, pepeMirandoDerecha));
+		}
+		for (Tortuga tortuga : tortugas) {
+			if (pep.colisionaConTortuga(tortuga)) {
+				pep.juegoPerdido();
+			}
+
+		}
 		pep.dibujar(entorno);
 
-	}
+		// BOLADEFUEGO
+		for (int i = 0; i < bolasDeFuego.size(); i++) {
+			BolaDeFuego bola = bolasDeFuego.get(i);
+			bola.moverBolaDeFuego();
 
-	private Isla nextIsla(int numIslaActual) {
-		Isla isla = this.islas[numIslaActual];
-		if (isla != null) {
-			return isla;
-		} else {
-			return null;
+			if (bola.getX() > anchoPantalla || bola.getX() < 0) {
+				bolasDeFuego.remove(i);
+				i--;
+			}
+			bola.dibujar(entorno);
 		}
 
+		// TEXTOS
+		entorno.escribirTexto("Gnomos perdidos: " + gnomosPerdidos, 100, 100);
+		entorno.escribirTexto("Gnomos Salvados: " + gnomosSalvados, 100, 150);
+	}
+
+	private Gnomo crearNuevoGnomo() {
+		return new Gnomo((anchoPantalla / 2), 60, 30, 50, 1, random.nextBoolean());
+	}
+
+	private Tortuga crearNuevaTortuga() {
+		int numRandom;
+		do {
+			numRandom = random.nextInt(anchoPantalla);
+		} while (!((numRandom > 100 && numRandom <= 400) || (numRandom >= 600 && numRandom < 950)));
+		return new Tortuga(numRandom, 60, 50, 50, 1, random.nextBoolean());
 	}
 
 	private void moverPep() {
-		if (entorno.estaPresionada(entorno.TECLA_ARRIBA)) {
-			pep.iniciarSalto();
-		}
-		pep.actualizarSalto();
-		if (entorno.estaPresionada(entorno.TECLA_DERECHA) && pep.getX() < entorno.ancho() - pep.getAncho()) {
-			pep.moverDerecha();
-		}
-		if (entorno.estaPresionada(entorno.TECLA_IZQUIERDA) && pep.getX() > 0 + pep.getAncho()) {
+		pep.actualizarSalto(islas);
+
+		if (entorno.estaPresionada(entorno.TECLA_IZQUIERDA) && pep.getX() > pep.getAncho()) {
+			pepeMirandoDerecha = false;
 			pep.moverIzquierda();
 		}
-	}
-
-	private void controlIslasPep(int isla) {
-		Isla islaActual = this.islas[isla];
-		int limiteIzquierdoIsla = islaActual.getX() - (islaActual.getAncho());
-		int limiteDerechoIsla = islaActual.getX() + (islaActual.getAncho());
-		int limiteIzquierdoPep = pep.getX() - (pep.getAncho());
-		int limiteDerechoPep = pep.getX() + (pep.getAncho());
-
-		// add control when pep is outside screen cant move
-
-		if ((limiteIzquierdoPep >= limiteIzquierdoIsla && limiteDerechoPep <= limiteDerechoIsla)) {
-			moverPep();
-		} else {
-			pep.moverAbajo();
-			if (pep.getY() <= 500) {
-				moverPep();
-			}
-			if (pep.getY() - pep.getAlto() >= this.entorno.alto()) {
-				juegoRunning = false;
-			}
-
+		if (entorno.estaPresionada(entorno.TECLA_DERECHA) && pep.getX() < entorno.ancho() - pep.getAncho()) {
+			pepeMirandoDerecha = true;
+			pep.moverDerecha();
+		}
+		if (entorno.sePresiono(entorno.TECLA_ARRIBA)) {
+			pep.iniciarSalto();
 		}
 	}
 
