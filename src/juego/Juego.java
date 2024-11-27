@@ -22,14 +22,12 @@ public class Juego extends InterfaceJuego {
 	private Pep pep;
 	private Gnomo[] gnomos;
 	private Tortuga[] tortugas;
-	// private BolaDeFuego[] bolaDeFuego;
 	private ArrayList<BolaDeFuego> bolasDeFuego;
+	private long tiempoInicio;
 
 	Random random = new Random();
-	int islaActual = 1;
 	int anchoPantalla = 1000;
 	Boolean juegoRunning = true;
-	Boolean logs = true;
 
 	int gnomosSalvados = 0;
 	int gnomosPerdidos = 0;
@@ -42,9 +40,8 @@ public class Juego extends InterfaceJuego {
 		this.islas = new Isla[16];
 		this.gnomos = new Gnomo[4];
 		this.tortugas = new Tortuga[6];
-		// this.bolaDeFuego = new BolaDeFuego[6];
 		this.bolasDeFuego = new ArrayList<>();
-		// this.imagenIsla = Herramientas.cargarImagen("img/isla.png");
+		this.tiempoInicio = System.currentTimeMillis();
 
 		int islaNum = 0;
 		int gnomoNum = 0;
@@ -63,12 +60,13 @@ public class Juego extends InterfaceJuego {
 				islaNum++;
 			}
 		}
+
 		for (int i = 1; i <= gnomos.length; i++) {
 			this.gnomos[gnomoNum] = crearNuevoGnomo();
 			gnomoNum++;
 		}
 
-		for (int i = 0; i < tortugas.length; i++) {
+		for (int i = 1; i <= tortugas.length; i++) {
 			this.tortugas[tortugaNum] = crearNuevaTortuga();
 			tortugaNum++;
 
@@ -98,7 +96,6 @@ public class Juego extends InterfaceJuego {
 				isla.dibujar(this.entorno);
 			}
 		}
-
 		// GNOMOS
 		for (int i = 0; i < gnomos.length; i++) {
 			Gnomo gnomo = gnomos[i];
@@ -209,10 +206,14 @@ public class Juego extends InterfaceJuego {
 			bola.dibujar(entorno);
 		}
 
+		long tiempoActual = System.currentTimeMillis();
+		long tiempoTranscurrido = (tiempoActual - tiempoInicio) / 1000; // En segundos
+
 		// TEXTOS
-		entorno.escribirTexto("Gnomos perdidos: " + gnomosPerdidos, 100, 100);
-		entorno.escribirTexto("Gnomos Salvados: " + gnomosSalvados, 100, 150);
-		entorno.escribirTexto("Tortugas Eliminadas: " + tortugasDerrotadas, 100, 200);
+		entorno.escribirTexto("Gnomos perdidos: " + gnomosPerdidos, 50, 25);
+		entorno.escribirTexto("Gnomos Salvados: " + gnomosSalvados, 50, 50);
+		entorno.escribirTexto("Tortugas Eliminadas: " + tortugasDerrotadas, 50, 75);
+		entorno.escribirTexto("Tortugas Eliminadas: " + tiempoTranscurrido + " s", 800, 75);
 	}
 
 	private Gnomo crearNuevoGnomo() {
@@ -223,7 +224,7 @@ public class Juego extends InterfaceJuego {
 		} else {
 			rutaImagen = "img/gnomoIzquierda.png";
 		}
-		return new Gnomo((anchoPantalla / 2), 60, 30, 50, 1, moverDerecha, rutaImagen);
+		return new Gnomo((anchoPantalla / 2), 60, 20, 50, 1, moverDerecha, rutaImagen);
 	}
 
 	private Tortuga crearNuevaTortuga() {
@@ -244,15 +245,17 @@ public class Juego extends InterfaceJuego {
 	private void moverPep() {
 		pep.actualizarSalto(islas);
 
-		if (entorno.estaPresionada(entorno.TECLA_IZQUIERDA) && pep.getX() > pep.getAncho()) {
+		if (entorno.estaPresionada(entorno.TECLA_IZQUIERDA)
+				|| entorno.estaPresionada('a') && pep.getX() > pep.getAncho()) {
 			pep.setImagen("img/pepIzquierda.png");
 			pep.moverIzquierda();
 		}
-		if (entorno.estaPresionada(entorno.TECLA_DERECHA) && pep.getX() < entorno.ancho() - pep.getAncho()) {
+		if (entorno.estaPresionada(entorno.TECLA_DERECHA)
+				|| entorno.estaPresionada('d') && pep.getX() < entorno.ancho() - pep.getAncho()) {
 			pep.setImagen("img/pepDerecha.png");
 			pep.moverDerecha();
 		}
-		if (entorno.sePresiono(entorno.TECLA_ARRIBA)) {
+		if (entorno.sePresiono(entorno.TECLA_ARRIBA) || entorno.estaPresionada('w')) {
 			pep.iniciarSalto();
 		}
 	}

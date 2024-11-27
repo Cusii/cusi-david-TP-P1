@@ -108,9 +108,10 @@ public class Pep {
     }
 
     public void juegoPerdido() {
-        System.out.println("Pep ha salido de la pantalla. Fin del juego.");
-        // Aquí puedes manejar el reinicio o la finalización del juego
+        System.out.println("Game Over: Pep ha perdido.");
+        // Notificar al juego que ha terminado
     }
+    
 
     public int getX() {
         return x;
